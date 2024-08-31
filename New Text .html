@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Textboxes with Balance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #header {
+            text-align: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+        #date {
+            font-size: 18px;
+            color: #333;
+        }
+        #balance {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            border: 2px solid #007bff;
+            background-color: #e9f2ff;
+            color: #007bff;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .container-wrapper {
+            display: flex;
+            gap: 20px;
+            margin: 20px;
+            max-width: 1200px;
+            flex-wrap: wrap;
+        }
+        .column-container {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .column-container h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .text-box-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .remove-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 5px; /* Adjusted margin to fit within container */
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px; /* Smaller font size */
+            font-weight: bold;
+        }
+        .remove-button:hover {
+            background-color: #c82333;
+        }
+        .text-box-container input[type="checkbox"] {
+            width: 40px; /* Increased checkbox size */
+            height: 40px; /* Increased checkbox size */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div id="date"></div>
+        <div id="balance">Balance: 0</div>
+    </div>
+    <div class="container-wrapper">
+        <!-- Column 1: TASKS -->
+        <div id="container1" class="column-container">
+            <h3>TASKS</h3>
+            <div>
+                <input type="text" id="textbox1" placeholder="TASKS" disabled>
+            </div>
+            <button onclick="addTextBox('container1', 'TASKS', 10)">Add TextBox</button>
+        </div>
+        <!-- Column 2: SMALL -->
+        <div id="container2" class="column-container">
+            <h3>SMALL</h3>
+            <div>
+                <input type="text" id="textbox2" placeholder="SMALL" disabled>
+            </div>
+            <button onclick="addTextBox('container2', 'SMALL', -100)">Add TextBox</button>
+        </div>
+        <!-- Column 3: MEDIUM -->
+        <div id="container3" class="column-container">
+            <h3>MEDIUM</h3>
+            <div>
+                <input type="text" id="textbox3" placeholder="MEDIUM" disabled>
+            </div>
+            <button onclick="addTextBox('container3', 'MEDIUM', -200)">Add TextBox</button>
+        </div>
+        <!-- Column 4: BIG -->
+        <div id="container4" class="column-container">
+            <h3>BIG</h3>
+            <div>
+                <input type="text" id="textbox4" placeholder="BIG" disabled>
+            </div>
+            <button onclick="addTextBox('container4', 'BIG', -300)">Add TextBox</button>
+        </div>
+    </div>
+    <script>
+        let balance = 0;
+
+        function updateBalance(amount) {
+            if (typeof amount === 'number' && !isNaN(amount)) {
+                balance += amount;
+                document.getElementById('balance').innerText = `Balance: ${balance}`;
+            } else {
+                console.error('Invalid amount:', amount);
+            }
+        }
+
+        function addTextBox(containerId, placeholder, points) {
+            const container = document.getElementById(containerId);
+
+            const newTextBoxContainer = document.createElement('div');
+            newTextBoxContainer.classList.add('text-box-container');
+
+            const newTextBox = document.createElement('input');
+            newTextBox.type = 'text';
+            newTextBox.placeholder = ''; // No placeholder text for dynamically created text boxes
+            newTextBox.disabled = true;
+
+            const newCheckBox = document.createElement('input');
+            newCheckBox.type = 'checkbox';
+            newCheckBox.style.width = '40px'; // Increased checkbox size
+            newCheckBox.style.height = '40px'; // Increased checkbox size
+            newCheckBox.dataset.points = points; // Store points value in a data attribute
+            newCheckBox.addEventListener('change', function () {
+                // Ensure points is a number
+                let pointValue = parseInt(this.dataset.points, 10) || 0;
+                if (containerId === 'container1') {
+                    // For TASKS column, add points when checked
+                    if (this.checked) {
+                        updateBalance(pointValue);
+                    } else {
+                        updateBalance(-pointValue);
+                    }
+                } else {
+                    // For other columns, subtract points when checked
+                    if (this.checked) {
+                        updateBalance(pointValue);
+                    } else {
+                        updateBalance(-pointValue);
+                    }
+                }
+            });
+
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove-button');
+            removeButton.innerText = 'Remove';
+            removeButton.addEventListener('click', function () {
+                // Remove the value from balance based on checkbox state
+                if (newCheckBox.checked) {
+                    updateBalance(-parseInt(newCheckBox.dataset.points, 10) || 0);
+                }
+                container.removeChild(newTextBoxContainer);
+            });
+
+            newTextBoxContainer.appendChild(newTextBox);
+            newTextBoxContainer.appendChild(newCheckBox);
+            newTextBoxContainer.appendChild(removeButton);
+
+            container.insertBefore(newTextBoxContainer, container.lastElementChild);
+        }
+
+        // Set today's date
+        function setTodaysDate() {
+            const today = new Date();
+            const dateString = today.toDateString(); // e.g., "Sat Aug 31 2024"
+            document.getElementById('date').innerText = `Today's Date: ${dateString}`;
+        }
+
+        setTodaysDate();
+    </script>
+</body>
+</html>
